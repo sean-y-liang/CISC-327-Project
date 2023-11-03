@@ -4,20 +4,152 @@ from datetime import datetime
 connection_string = "Driver={ODBC Driver 18 for SQL Server};Server=tcp:cisc327-server.database.windows.net,1433;Database=db;Uid=CloudSAe60b9174;Pwd=Password123;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
 
 try:
-    conn = pyodbc.connect(connection_string)
-    cursor = conn.cursor()
+  # Connect to the database
+  conn = pyodbc.connect(connection_string)
+  cursor = conn.cursor()
 
-    # Perform database operations here
+  # Check if the connection was successful
+  print("Connected to the database!")
 
-    # Close the cursor and connection
-    cursor.close()
-    conn.close()
+  # Perform database operations here
 
-    # Check if the connection was successful
-    print("Connected to the database!")
+  # Close the cursor and connection
+  cursor.close()
+  conn.close()
 
 except pyodbc.Error as e:
-    print("Error:", str(e))
+  print("Error:", str(e))
+
+"""
+This class is used to define the methods that will information regarding the user and
+their order(s) into the database.
+"""
+class DatabaseManager:
+  def __init__(self, connection_string):
+    self.connection_string = connection_string
+    self.conn = pyodbc.connect(connection_string)
+    self.cursor = conn.cursor()
+
+  def save_user_details(self, user_id, user_name, user_email, user_password, user_address, user_phone, user_dropoff):
+    insert_sql = "INSERT INTO Users (user_id, user_name, user_email, user_password, user_address, user_phone, user_dropoff) VALUES (?, ?, ?, ?, ?, ?, ?)"
+    self.cursor.execute(insert_sql, user_id, user_name, user_email, user_password, user_address, user_phone, user_dropoff)
+    self.conn.commit()
+
+  def update_user_details(self, user_id, user_name, user_email, user_password, user_address, user_phone, user_dropoff):
+    update_sql = """
+    UPDATE Users 
+    SET user_name = ?, 
+        user_email = ?,
+        user_password = ?, 
+        user_address = ?,
+        user_phone = ?,
+        user_dropoff= ? 
+    WHERE user_id = ?
+    """
+    self.cursor.execute(update_sql, user_name, user_email, user_password, user_address, user_phone, user_dropoff, user_id)
+    self.conn.commit()
+
+  def delete_user_details(self, user_id):
+    delete_sql = "DELETE FROM Users WHERE user_id = ?"
+    self.cursor.execute(delete_sql, user_id)
+    self.conn.commit()
+
+  def save_payment(self, payment_id, user_id, payment_method):
+    insert_sql = "INSERT INTO PaymentMethods (payment_id, user_id, payment_method) VALUES (?, ?, ?)"
+    self.cursor.execute(insert_sql, payment_id, user_id, payment_method)
+    self.conn.commit()
+
+  def update_payment_details(self, payment_id, payment_method):
+    update_sql = """
+    UPDATE PaymentMethods 
+    SET payment_method = ?
+    WHERE payment_id = ?
+    """
+    self.cursor.execute(update_sql, payment_method, payment_id)
+    self.conn.commit()
+
+  def delete_payment(self, payment_id):
+    delete_sql = "DELETE FROM PaymentMethods WHERE payment_id = ?"
+    self.cursor.execute(delete_sql, payment_id)
+    self.conn.commit()
+
+  def add_restaurant(self, restaurant_id, name, cuisine, rating):
+    insert_sql = "INSERT INTO Restaurants (restaurant_id, name, cuisine, rating) VALUES (?, ?, ?, ?)"
+    self.cursor.execute(insert_sql, restaurant_id, name, cuisine, rating)
+    self.conn.commit()
+
+  def update_restaurant_details(self, restaurant_id, name, cuisine, rating):
+    update_sql = """
+    UPDATE Restaurants
+    SET name = ?,
+        cuisine = ?,
+        rating = ?
+    WHERE restaurant_id = ?
+    """
+    self.cursor.execute(update_sql, name, cuisine, rating, restaurant_id)
+    self.conn.commit()
+
+  def delete_restaurant(self, restaurant_id):
+    delete_sql = "DELETE FROM Restaurants WHERE restaurant_id = ?"
+    self.cursor.execute(delete_sql, restaurant_id)
+    self.conn.commit()
+
+  def add_menu_items(self, item_id, restaurant_id, name, price, options):
+    insert_sql = "INSERT INTO MenuItems (item_id, restaurant_id, name, price, options) VALUES (?, ?, ?, ?, ?)"
+    self.cursor.execute(insert_sql, item_id, restaurant_id, name, price, options)
+    self.conn.commit()
+
+  def update_menu_items(self, item_id, name, price, options):
+    update_sql = """
+    UPDATE MenuItems
+    SET name = ?,
+        price = ?,
+        options = ?
+    WHERE item_id = ?
+    """
+    self.cursor.execute(update_sql, name, price, options, item_id)
+    self.conn.commit()
+
+  def delete_menu_items(self, item_id):
+    delete_sql = "DELETE FROM MenuItems WHERE item_id = ?"
+    self.cursor.execute(delete_sql, item_id)
+    self.conn.commit()
+
+  def save_order(self, order_id, user_id, restaurant_id, total, status, order_time, order_details_id, item_id, quantity):
+    insert_sql = "INSERT INTO Orders (order_id, user_id, restaurant_id, total, status, order_time) VALUES (?, ?, ?, ?, ?, ?)"
+    self.cursor.execute(insert_sql, order_id, user_id, restaurant_id, total, status, order_time)
+    self.conn.commit()
+
+    insert_sql = "INSERT INTO OrderDetails (order_details_id, order_id, item_id, quantity) VALUES (?, ?, ?, ?)"
+    self.cursor.execute(insert_sql, order_details_id, order_id, item_id, quantity)
+    self.conn.commit()
+
+  def update_order(self, order_id, status):
+    update_sql = """
+    UPDATE Orders
+    SET status = ?,
+    WHERE order_id = ?
+    """
+    self.cursor.execute(update_sql, status, order_id)
+    self.conn.commit()
+
+  def cancel_order(self, order_id):
+    delete_sql = "DELETE FROM Orders WHERE order_id = ?"
+    self.cursor.execute(delete_sql, order_id)
+    self.conn.commit()
+
+    delete_sql = "DELETE FROM OrderDEtails WHERE order_id = ?"
+    self.cursor.execute(delete_sql, order_id)
+    self.conn.commit()
+
+  def save_review(self, review_id, order_id, user_id, review, rating, review_time):
+    insert_sql = "INSERT INTO Reviews (review_id, order_id, user_id, review, rating, review_time) VALUES (?, ?, ?, ?, ?, ?)"
+    self.cursor.execute(insert_sql, review_id, order_id, user_id, review, rating, review_time)
+    self.conn.commit()
+    
+  def close_connection(self):
+    self.cursor.close()
+    self.conn.close()
 
 """
 This class is used to define a user's account details and allows them to login to their 
