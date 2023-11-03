@@ -1,5 +1,23 @@
-import mysql.connector
+import pyodbc
 from datetime import datetime
+
+connection_string = "Driver={ODBC Driver 18 for SQL Server};Server=tcp:cisc327-server.database.windows.net,1433;Database=db;Uid=CloudSAe60b9174;Pwd=Password123;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
+
+try:
+    conn = pyodbc.connect(connection_string)
+    cursor = conn.cursor()
+
+    # Perform database operations here
+
+    # Close the cursor and connection
+    cursor.close()
+    conn.close()
+
+    # Check if the connection was successful
+    print("Connected to the database!")
+
+except pyodbc.Error as e:
+    print("Error:", str(e))
 
 """
 This class is used to define a user's account details and allows them to login to their 
