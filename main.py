@@ -194,59 +194,46 @@ class Account:
         self.user_main_payment = None
         self.user_payment_methods = []
 
-    def account_creation(self):
+    def account_creation(self, user_name, user_id, user_email, user_password, user_address, user_phone, user_main_payment, user_dropoff):
         """
         Function that creates a new account for users with information such as their name, 
         user ID, email, address, phone number, password, payment method, and dropoff 
         location.
         """
-
-        print("Please enter the following information to create your account: ")
-
-        self.user_name = input("Enter your name:")
-        self.user_id = input("Enter your user ID:")
-        self.user_email = input("Enter your email:")
-        self.user_password = input("Enter your password:")
-        self.user_address = input("Enter your address:")
-        self.user_phone = input("Enter your phone number:")
-        # Enter your main payment method which can be one of many methods
-        self.user_main_payment = input("Enter your payment method:")
+        self.user_name = user_name
+        self.user_id = user_id
+        self.user_email = user_email
+        self.user_password = user_password
+        self.user_address = user_address
+        self.user_phone = user_phone
+        self.user_main_payment = user_main_payment
         self.user_payment_methods.append(self.user_main_payment)
-        self.user_dropoff = input("Enter your preferred dropoff location:")
+        self.user_dropoff = user_dropoff
 
-    def login(self):
+    def login(self, user_id, user_password):
         """
         Function that allows users to enter their user ID and password to be able to access 
         their account. 
         """
-
-        print("Please enter your user ID and password to login to your account")
-
-        user_id = input("Enter your user ID:")
-        user_password = input("Enter your password:")
-
-        if len(user_id) and len(user_password) != 0:
+        if user_id == self.user_id and user_password == self.user_password:
             print("Successful Login!")
+            return True
         else:
             print("Login Failed. Please Try Again.")
+            return False
 
-    def account_management(self):
+    def account_management(self, user_password, user_address, user_phone, user_main_payment, user_dropoff):
         """
         Function that allows users to edit account details such as their address, 
         phone number, password, payment method(s), and preferred drop off method. 
         """
-
-        print("Please enter changes to the following information or press enter to skip:")
-
-        self.user_password = input("Enter your password:")
-        self.user_address = input("Enter your address:")
-        self.user_phone = input("Enter your phone number:")
-        # Change your payment method or add a new one
-        self.user_main_payment = input("Enter your payment method:")
+        self.user_password = user_password
+        self.user_address = user_address
+        self.user_phone = user_phone
+        self.user_main_payment = user_main_payment
         if self.user_main_payment not in self.user_payment_methods:
             self.user_payment_methods.append(self.user_main_payment)
-        self.user_dropoff = input("Enter your preferred dropoff location:")
-
+        self.user_dropoff = user_dropoff
         print("All changes successful!")
 
 
@@ -270,34 +257,29 @@ This class defines how users search for a restaurant from a list.
 
 
 class RestaurantView:
-    # Constructor that creates a list of restaurants
     def __init__(self, restaurants):
         self.restaurants = restaurants
 
-    def find_restaurant(self):
+    def find_restaurant(self, search_term, rating_filter, cuisine_filter):
         """
         Function that allows users to search for a restaurant by name, cuisine, and/or 
         rating.
         """
-
-        # This is a flag to check if results show up based on search criteria
-        results_exist = False
-
-        search_term = input("Search:")
-        rating = input("Rating Filter:")
-        cuisine = input("Cuisine Filter:")
+        search_term = search_term.lower()
+        cuisine_filter = cuisine_filter.lower()
+        rating_filter = float(rating_filter)  # Ensure rating_filter is a float
 
         for restaurant in self.restaurants:
-            if search_term in restaurant.name.lower() and \
-               cuisine.lower() == restaurant.cuisine.lower() and \
-               rating <= restaurant.rating:
+            if search_term == restaurant.name.lower() and \
+               cuisine_filter == restaurant.cuisine.lower() and \
+               rating_filter <= float(restaurant.rating):  # Convert restaurant rating to float
 
-                print(
-                    f"{restaurant.name}\n {restaurant.cuisine} cuisine\n {restaurant.rating} stars")
-                results_exist = True
+                print(f"{restaurant.name}\n {restaurant.cuisine} cuisine\n {restaurant.rating} stars")
+                return restaurant
 
-        if not results_exist:
-            print("No Results Found")
+        print("No Results Found")
+        return None
+
 
 
 """
@@ -330,23 +312,13 @@ class Order:
         self.past_orders = past_orders
         self.reviewed = False
 
-    def add_menu_item(self):
+    def add_menu_item(self, menu_item, quantity):
         """
         Function that allows users to add items to their cart.
         """
-
-        menu_item = input("Add Menu Item:")
-        options = input("Select Options:")
-        quantity = input("Quantity:")
-
-        for item in self.items:
-            if menu_item.lower == item.name.lower:
-                item.quantity += quantity
-                item.options = options
-                self.cart.append(item)
-                print(f"{item.name} added to cart")
-                # Once the item is found no need to check others
-                break
+        menu_item.quantity = quantity
+        self.cart.append(menu_item)
+        print(f"{menu_item.name} added to cart")
 
     def view_cart(self):
         """
@@ -354,60 +326,41 @@ class Order:
         """
 
         sub_total = 0
-
-        # If the item is in the cart but the quantity is 0 remove it
         for item in self.cart:
-            if item.quantity < 1:
-                del item
-
-        if self.cart is not []:
-            for item in self.cart:
-                print(f"{item.name}\n Options: {item.options}\n Price: {item.price}\n \
+            print(f"{item.name}\n Options: {item.options}\n Price: {item.price}\n \
         Quantity: {item.quantity}")
-                sub_total += item.price * item.quantity
+            sub_total += item.price * item.quantity
 
-            print(f"Subtotal: ${sub_total}\n Delivery Fee: ${sub_total * 0.1}\n Tax: \
-      ${sub_total * 0.13}\n Total: ${sub_total * 1.23}")
+        total = sub_total * 1.23  # Assuming a fixed tax and delivery rate for simplicity
+        print(f"Subtotal: ${sub_total}\n Total: ${total}")
+        self.order_details["total"] = total
 
-            self.order_details["total"] = sub_total * 1.23
-
-    def change_item_quantity(self):
+    def change_item_quantity(self, item_name, quantity):
         """
         Function that allows users to change the quantity of an item in their cart.
         """
-
-        item_name = input("Which item do you want to change?")
-        quantity = input("Change Item Quantity:")
-
         for item in self.cart:
-            if item_name.lower == item.name.lower:
+            if item_name.lower() == item.name.lower():
                 item.quantity = quantity
                 print(f"{item.name} quantity changed to {quantity}")
-                # If change is made no need to search all items
                 break
 
-    def checkout(self):
+    def checkout(self, address, dropoff_location, payment_method, promotions, tips):
         """
         Function that allows users to change details regarding their order and checkout.
         """
-
-        address = input("Change address (press enter to skip):")
-        dropoff_location = input(
-            "Change delivery instructions (press enter to skip):")
-        payment_method = input("Change payment method (press enter to skip):")
-        promotions = float(input("Add promotion (or enter zero):"))
-        tips = float(input("Add tips (or enter zero):"))
-
-        # If the user did not skip changing details declare changes
         if address != "":
+            self.order_details["address"] = address
             print(f"Address changed to {address}")
         if dropoff_location != "":
+            self.order_details["dropoff_location"] = dropoff_location
             print(f"Dropoff location changed to {dropoff_location}")
         if payment_method != "":
+            self.order_details["payment_method"] = payment_method
             print(f"Payment method changed to {payment_method}")
 
-        print(
-            f"Your order total is: ${self.order_details['total'] - promotions + tips}")
+        self.order_details["total"] = self.order_details["total"] - promotions + tips
+        print(f"Your order total is: ${self.order_details['total']}")
         print("Please confirm all details before proceeding.")
 
     def track_order_progress(self, order_id, estimated_time, progress):
@@ -417,31 +370,28 @@ class Order:
         """
 
         self.order_details["order_id"] = order_id
-        if "date and time" not in self.order_details:
-            self.order_details["date and time"] = datetime.now()
+        self.order_details["estimated_time"] = estimated_time
+        self.progress = progress
         print(f"Tracking progress of order {order_id} from \
     {self.order_details['restaurant']}")
         print(f"Estimated time until delivery: {estimated_time}")
-        self.progress = progress
         print(f"Status of delivery: {progress}")
 
-    def restaurant_reviews(self):
+    def restaurant_reviews(self, review):
         """
         Function to review orders made by the user.
         """
-
-        if self.progress == "Delivered" and self.reviewed is False:
+        
+        if self.progress == "Delivered" and not self.reviewed:
             print("Thank you for ordering from us!")
-            self.review = input("Please rate your experience:")
+            self.review = review
             self.reviewed = True
             print("Thank you for your review!")
 
-    def order_history(self):
+    def order_history(self, order_id):
         """
         Function to display a user's order history.
         """
-
-        order_id = input("Please select an order to view details:")
 
         for order in self.past_orders:
             if order_id == order.order_details["order_id"]:
@@ -463,64 +413,64 @@ if __name__ == "__main__":
     database_initialization.main()
     database = DatabaseManager()
 
-    # Creating, logging into and changing details about user account
+    # Creating, logging into, and changing details about user account
     account = Account()
-    account.account_creation()
+    account.account_creation("John Doe", "john_doe_123", "johndoe@example.com", "pass123", "123 Elm Street", "555-1234", "Credit Card", "Front Door")
     # Inserting user into database
-    database.save_user_details(account.user_id, account.user_name, account.user_email,
-                               account.user_password, account.user_address, account.user_phone, account.user_dropoff)
-    database.save_payment(account.user_main_payment +
-                          "4360", account.user_id, account.user_main_payment)
-    account.login()
-    account.account_management()
+    database.save_user_details(account.user_id, account.user_name, account.user_email, account.user_password, account.user_address, account.user_phone, account.user_dropoff)
+    database.save_payment("CC123456", account.user_id, account.user_main_payment)
+
+    # Login and manage account details
+    account.login("john_doe_123", "pass123")
+    account.account_management("newpass123", "456 Oak Avenue", "555-5678", "Debit Card", "Side Gate")
+
     # Updating user details in database
-    database.update_user_details(account.user_id, account.user_name, account.user_email,
-                                 account.user_password, account.user_address, account.user_phone, account.user_dropoff)
-    database.update_payment_details(
-        account.user_main_payment + "1467", account.user_main_payment)
+    database.update_user_details(account.user_id, account.user_name, account.user_email, account.user_password, account.user_address, account.user_phone, account.user_dropoff)
+    database.update_payment_details("CC123456", "Debit Card")
 
     # Creating restaurant examples
     osmows = Restaurant("Osmow's", "Mediterranean", "4.8")
     popeyes = Restaurant("Popeyes", "American", "4.3")
+
     # Adding restaurants to database
-    database.add_restaurant("LocA_Osmows", osmows.name,
-                            osmows.cuisine, osmows.rating)
-    database.add_restaurant("LocE_Popeyes", popeyes.name,
-                            popeyes.cuisine, popeyes.rating)
+    database.add_restaurant("LocA_Osmows", osmows.name, osmows.cuisine, osmows.rating)
+    database.add_restaurant("LocE_Popeyes", popeyes.name, popeyes.cuisine, popeyes.rating)
 
     # Creating a list of restaurants and searching
     restaurants = RestaurantView([osmows, popeyes])
-    restaurants.find_restaurant()
+    found_restaurant = restaurants.find_restaurant("Osmow's", "4.8", "Mediterranean")
 
     # Creating menu items for Osmow's
     fries = MenuItem("STIX", 3.38, {"Size": "Medium", "Extra Sauce": None})
     brownie = MenuItem("Brownie", 3.99, None)
-    # Adding items to restaurant's menu
-    database.add_menu_items("Fries_Osmows", "STIX", 3.38, {
-                            "Size": "Medium", "Extra Sauce": "None"})
+
+    # Adding items to restaurant's menu in the database
+    database.add_menu_items("Fries_Osmows", "STIX", 3.38, {"Size": "Medium", "Extra Sauce": "None"})
     database.add_menu_items("ChocBrownie_Osmows", "Brownie", 3.99, "None")
 
     # Creating an order from Osmow's and playing with the functionality of the cart,
-    # tracking the order,and giving a review at the end
-    order = Order("Osmow's", [fries, brownie], None)
-    order.add_menu_item()
-    order.add_menu_item()
+    # tracking the order, and giving a review at the end
+    order = Order("Osmow's", [fries, brownie], [])
+    order.add_menu_item(fries, 2)
+    order.add_menu_item(brownie, 1)
     order.view_cart()
-    order.change_item_quantity()
-    order.checkout()
+    order.change_item_quantity("STIX", 3)
+    order.checkout("789 Pine Road", "Back Door", "Credit Card", 0, 5)
+
     # Creating order within database
-    database.save_order("#1Osmows", account.user_id, "LocA_Osmows", order.order_details["total"], order.progress, order.order_details["date and time"], "#1Osmows", [
-                        "Fries_Osmows", "ChocBrownie_Osmows"], order.cart)
+    database.save_order("#1Osmows", account.user_id, "LocA_Osmows", order.order_details["total"], "Order Confirmed", datetime.now(), "OrderDetail01", "Fries_Osmows", 3)
+
+    # Tracking order progress
     order.track_order_progress("#1Osmows", "1 hour", "Order Confirmed")
-    # Updating delivery status
-    database.update_order("#1Osmows", "Order Confirmed")
     order.track_order_progress("#1Osmows", "10 mins", "Out for Delivery")
-    # Updating delivery status
-    database.update_order("#1Osmows", "Out for Delivery")
     order.track_order_progress("#1Osmows", "0 mins", "Delivered")
-    # Updating delivery status
+
+    # Updating delivery status in the database
     database.update_order("#1Osmows", "Delivered")
-    order.restaurant_reviews()
-    database.save_review("#1Osmows", "#1Osmows", account.user_id,
-                         order.review, order.review, datetime.now())
-    order.order_history()
+
+    # Adding a review for the order
+    order.restaurant_reviews("Great food and fast delivery!")
+    database.save_review("#1RevOsmows", "#1Osmows", account.user_id, "Great food and fast delivery!", 5, datetime.now())
+
+    # Viewing order history
+    order.order_history("#1Osmows")
