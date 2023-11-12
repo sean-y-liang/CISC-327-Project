@@ -51,8 +51,7 @@ def test_add_menu_item():
     assert len(order.cart) == 1
     assert order.cart[0].name == "Fries"
     assert order.cart[0].quantity == 2
-
-
+    
 def test_change_item_quantity():
     osmows = Restaurant("Osmow's", "Mediterranean", "4.8")
     fries = MenuItem("Fries", 2.99, {"Size": "Medium", "Extras": "Cheese"})
