@@ -59,3 +59,19 @@ def test_change_item_quantity():
     order.add_menu_item(fries, 2)
     order.change_item_quantity("Fries", 3)
     assert order.cart[0].quantity == 3
+
+def test_track_order_progress():
+    osmows = Restaurant("Osmow's", "Mediterranean", "4.8")
+    order = Order(osmows.name, [], [])
+    order.track_order_progress("Order123", "30 mins", "Preparing")
+    assert order.order_details["order_id"] == "Order123"
+    assert order.order_details["estimated_time"] == "30 mins"
+    assert order.progress == "Preparing"
+
+def test_restaurant_reviews():
+    osmows = Restaurant("Osmow's", "Mediterranean", "4.8")
+    order = Order(osmows.name, [], [])
+    order.progress = "Delivered"
+    order.restaurant_reviews("Great!")
+    assert order.review == "Great!"
+    assert order.reviewed is True
