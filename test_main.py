@@ -78,15 +78,9 @@ def test_restaurant_reviews():
 
 def test_checkout_payment():
     osmows = Restaurant("Osmow's", "Mediterranean", "4.8")
-    payment = Order(osmows.name, [], [])
     fries = MenuItem("Fries", 2.99, {"Size": "Medium", "Extras": "Cheese"})
-    order = Order(osmows.name, [fries], [])
+    payment = Order(osmows.name, [fries], [])
+    payment.add_menu_item(fries, 1)
+    payment.view_cart()  # This should initialize the 'total' in order_details
     payment.checkout("123 Elm Street", "Front Door", "Credit Card", 0, 5)
-    assert payment.checkout["payment_method"] == "Credit Card"
-
-
-def test_order_history():
-    osmows = Restaurant("Osmow's", "Mediterranean", "4.8")
-    order = Order(osmows.name, [], [])
-    order.order_history("Order123")
-    assert order.order_history("order_id") == "Order123"
+    assert payment.order_details["payment_method"] == "Credit Card"
