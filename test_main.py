@@ -75,3 +75,18 @@ def test_restaurant_reviews():
     order.restaurant_reviews("Great!")
     assert order.review == "Great!"
     assert order.reviewed is True
+
+def test_checkout_payment():
+    osmows = Restaurant("Osmow's", "Mediterranean", "4.8")
+    payment = Order(osmows.name, [], [])
+    fries = MenuItem("Fries", 2.99, {"Size": "Medium", "Extras": "Cheese"})
+    order = Order(osmows.name, [fries], [])
+    payment.checkout("123 Elm Street", "Front Door", "Credit Card", 0, 5)
+    assert payment.checkout["payment_method"] == "Credit Card"
+
+
+def test_order_history():
+    osmows = Restaurant("Osmow's", "Mediterranean", "4.8")
+    order = Order(osmows.name, [], [])
+    order.order_history("Order123")
+    assert order.order_history("order_id") == "Order123"
