@@ -269,17 +269,20 @@ class RestaurantView:
         cuisine_filter = cuisine_filter.lower()
         rating_filter = float(rating_filter)  # Ensure rating_filter is a float
 
+        # List of restaurants to return based on search
+        restaurants = []
+
         for restaurant in self.restaurants:
-            if search_term == restaurant.name.lower() and \
-               cuisine_filter == restaurant.cuisine.lower() and \
-               rating_filter <= float(restaurant.rating):  # Convert restaurant rating to float
+            if search_term in restaurant.name.lower() and \
+               (cuisine_filter == restaurant.cuisine.lower() or cuisine_filter == "") and \
+               (rating_filter <= float(restaurant.rating) and rating_filter >= 0):  # Convert restaurant rating to float
 
-                print(f"{restaurant.name}\n {restaurant.cuisine} cuisine\n {restaurant.rating} stars")
-                return restaurant
-
-        print("No Results Found")
-        return None
-
+                print(
+                    f"{restaurant.name}\n {restaurant.cuisine} cuisine\n {restaurant.rating} stars")
+                restaurants.append(restaurant.name)
+        if restaurants == []:
+            print("No Results Found")
+        return restaurants
 
 
 """
@@ -359,7 +362,8 @@ class Order:
             self.order_details["payment_method"] = payment_method
             print(f"Payment method changed to {payment_method}")
 
-        self.order_details["total"] = self.order_details["total"] - promotions + tips
+        self.order_details["total"] = self.order_details["total"] - \
+            promotions + tips
         print(f"Your order total is: ${self.order_details['total']}")
         print("Please confirm all details before proceeding.")
 
@@ -381,7 +385,7 @@ class Order:
         """
         Function to review orders made by the user.
         """
-        
+
         if self.progress == "Delivered" and not self.reviewed:
             print("Thank you for ordering from us!")
             self.review = review
@@ -415,17 +419,22 @@ if __name__ == "__main__":
 
     # Creating, logging into, and changing details about user account
     account = Account()
-    account.account_creation("John Doe", "john_doe_123", "johndoe@example.com", "pass123", "123 Elm Street", "555-1234", "Credit Card", "Front Door")
+    account.account_creation("John Doe", "john_doe_123", "johndoe@example.com",
+                             "pass123", "123 Elm Street", "555-1234", "Credit Card", "Front Door")
     # Inserting user into database
-    database.save_user_details(account.user_id, account.user_name, account.user_email, account.user_password, account.user_address, account.user_phone, account.user_dropoff)
-    database.save_payment("CC123456", account.user_id, account.user_main_payment)
+    database.save_user_details(account.user_id, account.user_name, account.user_email,
+                               account.user_password, account.user_address, account.user_phone, account.user_dropoff)
+    database.save_payment("CC123456", account.user_id,
+                          account.user_main_payment)
 
     # Login and manage account details
     account.login("john_doe_123", "pass123")
-    account.account_management("newpass123", "456 Oak Avenue", "555-5678", "Debit Card", "Side Gate")
+    account.account_management(
+        "newpass123", "456 Oak Avenue", "555-5678", "Debit Card", "Side Gate")
 
     # Updating user details in database
-    database.update_user_details(account.user_id, account.user_name, account.user_email, account.user_password, account.user_address, account.user_phone, account.user_dropoff)
+    database.update_user_details(account.user_id, account.user_name, account.user_email,
+                                 account.user_password, account.user_address, account.user_phone, account.user_dropoff)
     database.update_payment_details("CC123456", "Debit Card")
 
     # Creating restaurant examples
@@ -433,19 +442,23 @@ if __name__ == "__main__":
     popeyes = Restaurant("Popeyes", "American", "4.3")
 
     # Adding restaurants to database
-    database.add_restaurant("LocA_Osmows", osmows.name, osmows.cuisine, osmows.rating)
-    database.add_restaurant("LocE_Popeyes", popeyes.name, popeyes.cuisine, popeyes.rating)
+    database.add_restaurant("LocA_Osmows", osmows.name,
+                            osmows.cuisine, osmows.rating)
+    database.add_restaurant("LocE_Popeyes", popeyes.name,
+                            popeyes.cuisine, popeyes.rating)
 
     # Creating a list of restaurants and searching
     restaurants = RestaurantView([osmows, popeyes])
-    found_restaurant = restaurants.find_restaurant("Osmow's", "4.8", "Mediterranean")
+    found_restaurant = restaurants.find_restaurant(
+        "Osmow's", "4.8", "Mediterranean")
 
     # Creating menu items for Osmow's
     fries = MenuItem("STIX", 3.38, {"Size": "Medium", "Extra Sauce": None})
     brownie = MenuItem("Brownie", 3.99, None)
 
     # Adding items to restaurant's menu in the database
-    database.add_menu_items("Fries_Osmows", "STIX", 3.38, {"Size": "Medium", "Extra Sauce": "None"})
+    database.add_menu_items("Fries_Osmows", "STIX", 3.38, {
+                            "Size": "Medium", "Extra Sauce": "None"})
     database.add_menu_items("ChocBrownie_Osmows", "Brownie", 3.99, "None")
 
     # Creating an order from Osmow's and playing with the functionality of the cart,
@@ -458,7 +471,8 @@ if __name__ == "__main__":
     order.checkout("789 Pine Road", "Back Door", "Credit Card", 0, 5)
 
     # Creating order within database
-    database.save_order("#1Osmows", account.user_id, "LocA_Osmows", order.order_details["total"], "Order Confirmed", datetime.now(), "OrderDetail01", "Fries_Osmows", 3)
+    database.save_order("#1Osmows", account.user_id, "LocA_Osmows",
+                        order.order_details["total"], "Order Confirmed", datetime.now(), "OrderDetail01", "Fries_Osmows", 3)
 
     # Tracking order progress
     order.track_order_progress("#1Osmows", "1 hour", "Order Confirmed")
@@ -470,7 +484,8 @@ if __name__ == "__main__":
 
     # Adding a review for the order
     order.restaurant_reviews("Great food and fast delivery!")
-    database.save_review("#1RevOsmows", "#1Osmows", account.user_id, "Great food and fast delivery!", 5, datetime.now())
+    database.save_review("#1RevOsmows", "#1Osmows", account.user_id,
+                         "Great food and fast delivery!", 5, datetime.now())
 
     # Viewing order history
     order.order_history("#1Osmows")
